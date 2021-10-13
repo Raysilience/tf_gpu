@@ -1,3 +1,5 @@
+import math
+
 import tensorflow as tf
 from tqdm import tqdm
 
@@ -16,22 +18,28 @@ if __name__ == '__main__':
         tf.config.experimental.set_memory_growth(device=gpus[0], enable=True)
         # tf.config.set_logical_device_configuration(device=gpus[0], logical_devices=[tf.config.LogicalDeviceConfiguration(memory_limit=0)])
 
-    # create model
-    model = CNN()
-    # model = ShuffleNetV2.shufflenet_0_1x()
+    TRAIN_NEW_MODEL = False
+
+    # create a new model
+    if TRAIN_NEW_MODEL:
+        # model = CNN()
+        model = ShuffleNetV2.shufflenet_0_1x()
+
+    # retrain model from a checkpoint
+    else:
+        model = tf.keras.models.load_model(SAVED_MODEL_DIR)
 
     # create dataloader
     train_data_loader = DataLoader(TRAIN_TFRECORD)
     valid_data_loader = DataLoader(VALID_TFRECORD)
 
-    train_dataset = train_data_loader.get_dataset(BATCH_SIZE, augment=False)
+    train_dataset = train_data_loader.get_dataset(BATCH_SIZE, augment=True)
     valid_dataset = valid_data_loader.get_dataset(BATCH_SIZE)
 
     total_train_num = train_data_loader.get_len()
 
 
-    # define loss and optimizer
-    loss_obj = tf.keras.losses.SparseCategoricalCrossentropy()
+    # define optimizer and loss
     # learning_rate = tf.keras.optimizers.schedules.ExponentialDecay(
     #     initial_learning_rate=1e-3,
     #     decay_steps=15,
@@ -43,7 +51,8 @@ if __name__ == '__main__':
     #     values=[1e-3, 5e-4, 1e-4]
     # )
     learning_rate = tf.keras.optimizers.schedules.InverseTimeDecay(
-        initial_learning_rate=3e-3,
+        # 1e-2, 3e-3, 1e-3, 3e-4,1e-4
+        initial_learning_rate=1e-3,
         decay_steps=20,
         decay_rate=0.1,
         staircase=True
@@ -51,6 +60,7 @@ if __name__ == '__main__':
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
+    loss_obj = tf.keras.losses.SparseCategoricalCrossentropy()
     train_loss = tf.keras.metrics.Mean(name='train_loss')
     train_acc = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
 
@@ -88,7 +98,7 @@ if __name__ == '__main__':
             #                                                                          train_loss.result().numpy(),
             #                                                                          train_acc.result().numpy()))
             step += 1
-            if step > total_train_num/BATCH_SIZE + 1: break
+            if step > math.ceil(total_train_num/BATCH_SIZE): break
 
         for image_batch, label_batch in valid_dataset:
             valid_step(image_batch, label_batch)
@@ -108,7 +118,7 @@ if __name__ == '__main__':
         valid_acc.reset_states()
 
         # save weights for every n epochs
-        if epoch % SAVE_EVERY_N_EPOCH == 0:
+        if epoch != 0 and epoch % SAVE_EVERY_N_EPOCH == 0:
             model.save_weights(filepath=SAVED_MODEL_DIR + 'epoch-{}'.format(epoch), save_format='tf')
 
     # save weights

@@ -81,7 +81,7 @@ class DataLoader:
             x, y = list(zip(*res))
             x = tf.convert_to_tensor(x)
             aug_img_gen = tf.keras.preprocessing.image.ImageDataGenerator(
-                # shear_range=0.2
+                shear_range=20,
                 rotation_range=20,
                 horizontal_flip=True,
                 vertical_flip=True
@@ -105,16 +105,16 @@ if __name__ == '__main__':
         batch_size=BATCH_SIZE,
         augment=True
     )
-    # image_batch, label_batch = next(iter(dataset))
-    #
+
     cnt = 0
     for image_batch, label_batch in dataset:
-        print(image_batch.shape)
-        # img = image_batch[0].numpy()
-        img = image_batch[0]
-        cv2.imwrite('/tmp/whiteboard/dataloader_test.jpg', img)
-        print(label_batch[0])
-        print(label_batch.shape)
-        cnt += 1
-        if cnt > 0:
-            break
+        for i in range(len(image_batch)):
+
+            img = image_batch[i]
+            cv2.imwrite('/tmp/whiteboard/dataloader_test_{}.jpg'.format(i), img)
+            print(label_batch[i])
+            print(label_batch.shape)
+            cnt += 1
+            if cnt > 10:
+                break
+        break

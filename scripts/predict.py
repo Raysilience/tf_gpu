@@ -25,27 +25,30 @@ if __name__ == '__main__':
     # model.load_weights(filepath=SAVED_MODEL_DIR+'model')
 
     # 方法二：加载已保存的模型，支持.variables, .__call__等基本属性方法的调用
-    # model = tf.saved_model.load(SAVED_MODEL_DIR)
+    model = tf.saved_model.load(SAVED_MODEL_DIR)
 
     # 方法三：加载已保存的keras模型，支持.fit, .predict等方法的调用
-    model = tf.keras.models.load_model(SAVED_MODEL_DIR)
+    # model = tf.keras.models.load_model(SAVED_MODEL_DIR)
 
     test_file = '/tmp/whiteboard/test4.jpg'
     img = cv2.imread(test_file)
     img = tf.convert_to_tensor(img, dtype=tf.float32)
     img = tf.expand_dims(img, axis=0)
     pred = model(img, training=False)
-    aug_img_gen = tf.keras.preprocessing.image.ImageDataGenerator(
-        # shear_range=0.2
-        rotation_range=20
-        # horizontal_flip=True
-    )
-    aug_iter = aug_img_gen.flow(img)
-    new_img = next(aug_iter)
-    cv2.imwrite('/tmp/whiteboard/aug_test6.jpg', new_img[0])
-    new_img = next(aug_iter)
-    cv2.imwrite('/tmp/whiteboard/aug_test7.jpg', new_img[0])
+
+
     print(pred)
     print(INDEX_TO_LABEL[np.argmax(pred)])
 
 
+    # 验证数据增强
+    # aug_img_gen = tf.keras.preprocessing.image.ImageDataGenerator(
+    #     shear_range=20
+    #     # rotation_range=180
+    #     # horizontal_flip=True
+    # )
+    #
+    # aug_iter = aug_img_gen.flow(img)
+    # for i in range(8):
+    #     new_img = next(aug_iter)
+    #     cv2.imwrite('/tmp/whiteboard/aug_test_{}.jpg'.format(i), new_img[0])

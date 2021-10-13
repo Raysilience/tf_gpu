@@ -14,17 +14,18 @@ VERSION = 'V1_0_0'
 
 # training params
 NUM_EPOCHS = 300
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 NUM_CLASSES = 6
 
 IMAGE_WIDTH = 128
 IMAGE_HEIGHT = 128
 CHANNELS = 3
+SCALING_FACTOR = 0.7
 
 SAVED_MODEL_DIR = '/tmp/whiteboard/saved_model/'
 SAVE_EVERY_N_EPOCH = 100
 EXPORT_METADATA_DIR = SAVED_MODEL_DIR + 'meta/'
-LABEL_FILE = EXPORT_METADATA_DIR + 'label.txt'
+LABEL_FILE = '/tmp/whiteboard/label.txt'
 
 RAW_DATA_DIR = '/tmp/whiteboard/raw_data/'
 DATASET_DIR = '/tmp/whiteboard/dataset/'

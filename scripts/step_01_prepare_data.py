@@ -60,7 +60,7 @@ if __name__ == '__main__':
                 filename = str(folder.joinpath('{0}.jpg'.format(p.stem)))
                 rect = cv2.boundingRect(pts)
                 x, y, w, h = rect
-                img = ShapeUtil.gen_image_from_points(pts, x, y, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, scale=0.7)
+                img = ShapeUtil.gen_image_from_points(pts, x, y, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, scale=SCALING_FACTOR)
                 cv2.imwrite(filename, img)
         print('number of training data: {}\nnumber of valid data: {}\nnumber of test data: {}'.format(cnt_train, cnt_valid, cnt_test))
 
