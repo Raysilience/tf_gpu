@@ -35,9 +35,6 @@ def define_flags():
     flags.DEFINE_string("export_directory", EXPORT_METADATA_DIR,
                         "Path to save the TFLite model files with metadata.")
 
-    # flags.mark_flag_as_required("model_file")
-    # flags.mark_flag_as_required("label_file")
-    # flags.mark_flag_as_required("export_directory")
 
 
 class ModelSpecificInfo(object):

@@ -103,25 +103,7 @@ def convert_model_to_pb(original_saved_model_dir, new_name, verbose=True):
                       name=new_name + '.pb',
                       as_text=False)
 
-def convert_to_tflite(original_saved_model_dir, export_path, quantized=False):
-    """
-    convert to tensorflow lite format
-    :param original_saved_model_dir: string of saved model directory
-    :param export_path: string of newly saved tflite model path
-    :return:
-    """
-    model = tf.keras.models.load_model(original_saved_model_dir)
-    converter = tf.lite.TFLiteConverter.from_keras_model(model)
 
-    # model = tf.saved_model.load(original_saved_model_dir)
-    # converter = tf.lite.TFLiteConverter.from_saved_model(model)
-    if quantized:
-        # 动态范围量化
-        converter.optimizations = [tf.lite.Optimize.DEFAULT]
-    tflite_model = converter.convert()
-    with open(export_path, "wb") as f:
-        f.write(tflite_model)
-    print('convert successfully to {}'.format(export_path))
 
 if __name__ == '__main__':
     convert_model_to_pb(SAVED_MODEL_DIR, 'shufflenetv2.pb', False)

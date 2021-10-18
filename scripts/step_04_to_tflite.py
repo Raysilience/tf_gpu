@@ -10,7 +10,34 @@
 import numpy as np
 import tensorflow as tf
 from config import *
-from utils.FileUtil import convert_to_tflite
+from utils import model_loader
+
+
+def convert_to_tflite(original_saved_model_dir, export_path, quantized=False):
+    """
+    convert to tensorflow lite format
+    :param original_saved_model_dir: string of saved model directory
+    :param export_path: string of newly saved tflite model path
+    :return:
+    """
+    # 加载模型
+    model = model_loader.load(
+        mode=1,
+        filepath=SAVED_MODEL_DIR+'best',
+        # dirpath=SAVED_MODEL_DIR
+    )
+    model._set_inputs(inputs=tf.TensorSpec(shape=[None, 128, 128, 3], dtype=tf.float32))
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)
+
+    # model = tf.saved_model.load(original_saved_model_dir)
+    # converter = tf.lite.TFLiteConverter.from_saved_model(model)
+    if quantized:
+        # 动态范围量化
+        converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    tflite_model = converter.convert()
+    with open(export_path, "wb") as f:
+        f.write(tflite_model)
+    print('convert successfully to {}'.format(export_path))
 
 if __name__ == '__main__':
     gpus = tf.config.list_physical_devices(device_type='GPU')
@@ -18,8 +45,8 @@ if __name__ == '__main__':
     tf.config.experimental.set_memory_growth(device=gpus[0], enable=True)
     tflite_model_path = "{0}{1}_{2}.tflite".format(SAVED_MODEL_DIR, MODEL_NAME, VERSION)
 
-    convert_on = True
-    test_on = False
+    convert_on = False
+    test_on = True
 
     if convert_on:
         # 转换tflite格式

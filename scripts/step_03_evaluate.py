@@ -9,6 +9,7 @@
 '''
 import tensorflow as tf
 
+from utils import model_loader
 from utils.data_loader import DataLoader
 import models.ShuffleNetV2 as ShuffleNetV2
 from config import *
@@ -19,16 +20,11 @@ if __name__ == '__main__':
     tf.config.experimental.set_memory_growth(device=gpus[0], enable=True)
 
     # 加载模型
-    # ================================================================================
-    # 方法一：加载模型源码与已保存的参数
-    # model = ShuffleNetV2.shufflenet_0_1x()
-    # model.load_weights(filepath=SAVED_MODEL_DIR+'model')
-
-    # 方法二：加载已保存的模型，支持.variables, .__call__等基本属性方法的调用
-    model = tf.saved_model.load(SAVED_MODEL_DIR)
-
-    # 方法三：加载已保存的keras模型，支持.fit, .predict等方法的调用
-    # model = tf.keras.models.load_model(SAVED_MODEL_DIR)
+    model = model_loader.load(
+        mode=1,
+        filepath=SAVED_MODEL_DIR+'best',
+        # dirpath=SAVED_MODEL_DIR
+    )
 
     data_loader = DataLoader(TEST_TFRECORD)
     dataset = data_loader.get_dataset()

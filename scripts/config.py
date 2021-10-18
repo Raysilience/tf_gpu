@@ -8,7 +8,7 @@
 @Desc       :
 '''
 
-DEVICE = 'gpu'
+DEVICE = 'GPU'
 MODEL_NAME = 'risc'
 VERSION = 'V1_0_0'
 
@@ -22,11 +22,18 @@ IMAGE_HEIGHT = 128
 CHANNELS = 3
 SCALING_FACTOR = 0.7
 
+# model saving directory
 SAVED_MODEL_DIR = '/tmp/whiteboard/saved_model/'
 SAVE_EVERY_N_EPOCH = 100
+
+# training summary directory
+SUMMARY_DIR = '/tmp/whiteboard/tensorboard'
+
+# generate metadata
 EXPORT_METADATA_DIR = SAVED_MODEL_DIR + 'meta/'
 LABEL_FILE = '/tmp/whiteboard/label.txt'
 
+# dataset directories
 RAW_DATA_DIR = '/tmp/whiteboard/raw_data/'
 DATASET_DIR = '/tmp/whiteboard/dataset/'
 TRAIN_DIR = DATASET_DIR + 'train'
@@ -41,6 +48,7 @@ TRAIN_SET_RATIO = 0.7
 TEST_SET_RATIO = 0.1
 VALID_SET_RATIO = 0.2
 
+# label-index conversion
 LABEL_TO_INDEX = {
     'unknown': 0,
     'ellipse': 1,

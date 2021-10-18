@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 from models.CNN import CNN
 from models.MLP import MLP
+from utils import model_loader
 from utils.data_loader import DataLoader
 from models import ShuffleNetV2
 from config import *
@@ -12,24 +13,27 @@ from config import *
 
 if __name__ == '__main__':
     # GPU settings
+    # ==========================================================================
+
     gpus = tf.config.list_physical_devices(device_type='GPU')
     tf.config.set_visible_devices(devices=gpus[0], device_type='GPU')
     for gpu in gpus:
         tf.config.experimental.set_memory_growth(device=gpus[0], enable=True)
-        # tf.config.set_logical_device_configuration(device=gpus[0], logical_devices=[tf.config.LogicalDeviceConfiguration(memory_limit=0)])
+        # tf.config.set_logical_device_configuration(
+        #     device=gpus[0],
+        #     logical_devices=[tf.config.LogicalDeviceConfiguration(memory_limit=0)]
+        # )
 
-    TRAIN_NEW_MODEL = False
-
-    # create a new model
-    if TRAIN_NEW_MODEL:
-        # model = CNN()
-        model = ShuffleNetV2.shufflenet_0_1x()
-
-    # retrain model from a checkpoint
-    else:
-        model = tf.keras.models.load_model(SAVED_MODEL_DIR)
+    # create model
+    # ==========================================================================
+    model = model_loader.load(
+        mode=1,
+        filepath=SAVED_MODEL_DIR+'best',
+        # dirpath=SAVED_MODEL_DIR
+    )
 
     # create dataloader
+    # ==========================================================================
     train_data_loader = DataLoader(TRAIN_TFRECORD)
     valid_data_loader = DataLoader(VALID_TFRECORD)
 
@@ -38,8 +42,14 @@ if __name__ == '__main__':
 
     total_train_num = train_data_loader.get_len()
 
+    # create summary writer
+    # ==========================================================================
+    summary_writer = tf.summary.create_file_writer(SUMMARY_DIR)
+    # tf.summary.trace_on(profiler=True)
 
     # define optimizer and loss
+    # ==========================================================================
+
     # learning_rate = tf.keras.optimizers.schedules.ExponentialDecay(
     #     initial_learning_rate=1e-3,
     #     decay_steps=15,
@@ -52,8 +62,8 @@ if __name__ == '__main__':
     # )
     learning_rate = tf.keras.optimizers.schedules.InverseTimeDecay(
         # 1e-2, 3e-3, 1e-3, 3e-4,1e-4
-        initial_learning_rate=1e-3,
-        decay_steps=20,
+        initial_learning_rate=1e-2,
+        decay_steps=50,
         decay_rate=0.1,
         staircase=True
     )
@@ -66,6 +76,7 @@ if __name__ == '__main__':
 
     valid_loss = tf.keras.metrics.Mean(name='valid_loss')
     valid_acc = tf.keras.metrics.SparseCategoricalAccuracy(name='valid_accuracy')
+    prev_valid_loss = float('inf')
 
     @tf.function
     def train_step(x, y):
@@ -86,19 +97,15 @@ if __name__ == '__main__':
         valid_acc.update_state(y_true=y, y_pred=y_pred)
 
 
-    # 获取数据，模型预测，计算损失，计算梯度，反向传播
+    # training process
+    # ==========================================================================
     for epoch in range(NUM_EPOCHS):
         step = 0
         for image_batch, label_batch in tqdm(train_dataset, desc='training'):
             train_step(image_batch, label_batch)
-            # print("Epoch: {}/{}, step: {}/{}, loss: {:.5f}, accuracy: {:.5f}".format(epoch,
-            #                                                                          NUM_EPOCHS,
-            #                                                                          step,
-            #                                                                          total_train_num // BATCH_SIZE,
-            #                                                                          train_loss.result().numpy(),
-            #                                                                          train_acc.result().numpy()))
             step += 1
-            if step > math.ceil(total_train_num/BATCH_SIZE): break
+            if step > math.ceil(total_train_num/BATCH_SIZE):
+                break
 
         for image_batch, label_batch in valid_dataset:
             valid_step(image_batch, label_batch)
@@ -110,23 +117,49 @@ if __name__ == '__main__':
                                                                   train_acc.result().numpy(),
                                                                   valid_loss.result().numpy(),
                                                                   valid_acc.result().numpy()))
+        with summary_writer.as_default():
+            tf.summary.scalar(
+                name='train loss',
+                data=train_loss.result().numpy(),
+                step=epoch
+            )
+            tf.summary.scalar(
+                name='train acc',
+                data=train_acc.result().numpy(),
+                step=epoch
+            )
+            tf.summary.scalar(
+                name='valid loss',
+                data=valid_loss.result().numpy(),
+                step=epoch
+            )
+            tf.summary.scalar(
+                name='valid acc',
+                data=valid_acc.result().numpy(),
+                step=epoch
+            )
+            tf.summary.scalar(
+                name='learning rate',
+                data=learning_rate(epoch*total_train_num//BATCH_SIZE),
+                step=epoch
+            )
 
+        # save weights for every n epochs
+        # if (epoch+1) % SAVE_EVERY_N_EPOCH == 0:
+        #     model.save_weights(filepath=SAVED_MODEL_DIR + 'epoch-{}'.format(epoch), save_format='tf')
+
+        # save weights when current model increases its performance on valid dataset
+        if valid_loss.result().numpy() < prev_valid_loss:
+            prev_valid_loss = valid_loss.result().numpy()
+            model.save_weights(filepath=SAVED_MODEL_DIR + 'best', save_format='tf')
 
         train_loss.reset_states()
         train_acc.reset_states()
         valid_loss.reset_states()
         valid_acc.reset_states()
 
-        # save weights for every n epochs
-        if epoch != 0 and epoch % SAVE_EVERY_N_EPOCH == 0:
-            model.save_weights(filepath=SAVED_MODEL_DIR + 'epoch-{}'.format(epoch), save_format='tf')
-
-    # save weights
-    # model.save_weights(filepath=SAVED_MODEL_DIR+"model", save_format='tf')
-
-    # save model as .h5 format
-    # model.save(h5_save_path)
-
     # save the whole model
-    tf.saved_model.save(model, SAVED_MODEL_DIR)
+
+    tf.keras.models.save_model(model, SAVED_MODEL_DIR)
+    # tf.saved_model.save(model, SAVED_MODEL_DIR)
 
