@@ -166,6 +166,7 @@ class MetadataPopulatorForImageClassifier(object):
 def main(_):
     model_file = FLAGS.model_file
     model_basename = os.path.basename(model_file)
+
     if model_basename not in _MODEL_INFO:
         raise ValueError(
             "The model info for, {0}, is not defined yet.".format(model_basename))
