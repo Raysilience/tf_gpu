@@ -19,7 +19,8 @@ class DataLoader:
         if labeled:
             self.tfrecord_format = {
                 'image': tf.io.FixedLenFeature([], tf.string),
-                'label': tf.io.FixedLenFeature([], tf.int64)
+                'label_0': tf.io.FixedLenFeature([], tf.int64),
+                'label_1': tf.io.FixedLenFeature([12], tf.int64)
             }
         else:
             self.tfrecord_format = {
@@ -42,8 +43,9 @@ class DataLoader:
         example = tf.io.parse_single_example(example_string, self.tfrecord_format)
         image = self._decode_image(example['image'])
         if self.labeled:
-            label = tf.cast(example['label'], tf.int64)
-            return image, label
+            label_0 = tf.cast(example['label_0'], tf.int64)
+            label_1 = tf.cast(example['label_1'], tf.int64)
+            return image, label_0, label_1
         return image
 
     def _load_dataset(self, ordered=False):
@@ -103,18 +105,15 @@ if __name__ == '__main__':
     data_loader = DataLoader(TRAIN_TFRECORD)
     dataset = data_loader.get_dataset(
         batch_size=BATCH_SIZE,
-        augment=True
+        augment=False
     )
 
     cnt = 0
-    for image_batch, label_batch in dataset:
-        for i in range(len(image_batch)):
+    for img_batch, label_0_batch, label_1_batch in dataset:
+        for i in range(len(img_batch)):
+            print(img_batch[i])
+            print(label_0_batch[i])
+            print(label_1_batch[i])
 
-            img = image_batch[i]
-            cv2.imwrite('/tmp/whiteboard/dataloader_test_{}.jpg'.format(i), img)
-            print(label_batch[i])
-            print(label_batch.shape)
-            cnt += 1
-            if cnt > 10:
-                break
+            break
         break

@@ -20,7 +20,7 @@ from config import *
 
 if __name__ == '__main__':
     # data preparation pipeline
-    CONVERT_RAW = True
+    CONVERT_RAW = False
     CONVERT_TFRECORD = True
     CLEAR_PREVIOUS_DIR = True
 
@@ -30,15 +30,20 @@ if __name__ == '__main__':
     if CONVERT_RAW:
         root = Path(RAW_DATA_DIR)
         target_root = Path(DATASET_DIR)
+        LABEL_DIR = DATASET_DIR + '/label/'
         cnt_train = 0
         cnt_valid = 0
         cnt_test = 0
         if CLEAR_PREVIOUS_DIR:
             FileUtil.clear_dir(DATASET_DIR)
+        # create label directory
+        FileUtil.make_dir(LABEL_DIR)
         for p in tqdm(root.glob('*.json'), desc='Processing'):
             with open(str(p), 'r') as f:
                 pts = []
-                lines = json.load(f)['line']
+                data = json.load(f)
+                lines = data['line']
+                res = {'label': 0, 'descriptor': [0]*12}
                 for line in lines:
                     if line:
                         pts.extend(line)
@@ -55,6 +60,7 @@ if __name__ == '__main__':
                     folder = target_root.joinpath('test')
                     cnt_test += 1
 
+                # 处理图片
                 folder = folder.joinpath(cls)
                 FileUtil.make_dir(folder)
                 filename = str(folder.joinpath('{0}.jpg'.format(p.stem)))
@@ -62,6 +68,19 @@ if __name__ == '__main__':
                 x, y, w, h = rect
                 img = ShapeUtil.gen_image_from_points(pts, x, y, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, scale=SCALING_FACTOR)
                 cv2.imwrite(filename, img)
+
+                # 处理标签
+                res['label'] = LABEL_TO_INDEX[data['label']]
+                if res['label'] > 1:
+                    points = data['descriptor']
+                    points = ShapeUtil.map_points(points, x, y, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, scale=SCALING_FACTOR).tolist()
+                    for i in range(len(data['descriptor'])):
+                        res['descriptor'][2*i] = points[i][0]
+                        res['descriptor'][2*i+1] = points[i][1]
+
+                with open(LABEL_DIR + p.name, 'w') as file:
+                    json.dump(res, file)
+
         print('number of training data: {}\nnumber of valid data: {}\nnumber of test data: {}'.format(cnt_train, cnt_valid, cnt_test))
 
 

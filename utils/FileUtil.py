@@ -7,6 +7,7 @@
 @Author     :Rui
 @Desc       :
 '''
+import json
 from pathlib import Path
 import shutil
 import tensorflow as tf
@@ -43,16 +44,38 @@ def gen_img_path_and_label(data_root_dir):
     return img_path, label
 
 
+def gen_img_path_and_multi_label(data_root_dir):
+    """
+    given root dir, generate image paths and labels correspondingly
+    :param data_root_dir:
+    :return: (img_path, label)
+    """
+    root = Path(data_root_dir)
+    if not root.exists():
+        raise ValueError('source directory not exist')
+    img_path = list(root.glob('*/*'))
+    labels_0 = []
+    labels_1 = []
+    for path in root.glob('*/*'):
+        with open(DATASET_DIR + 'label/' + path.stem + '.json', 'r') as f:
+            data = json.load(f)
+            labels_0.append(data['label'])
+            labels_1.append(data['descriptor'])
+    return img_path, labels_0, labels_1
 
-def _build_example(image_string, label):
+
+
+def _build_example(image_string, labels_0, labels_1):
     """
     create a tf.train.Example from features
     :param image_string: binary representation of image
-    :param label: index of label in the form of int
+    :param labels_0: index of label in the form of int
+    :param labels_1: descriptor of label in the form of int
     :return: tf.train.Example object
     """
     feature = {
-        'label': tf.train.Feature(int64_list=tf.train.Int64List(value=[label])),
+        'label_0': tf.train.Feature(int64_list=tf.train.Int64List(value=[labels_0])),
+        'label_1': tf.train.Feature(int64_list=tf.train.Int64List(value=labels_1)),
         'image': tf.train.Feature(bytes_list=tf.train.BytesList(value=[image_string]))
     }
 
@@ -66,12 +89,12 @@ def dataset_to_tfrecord(dataset_dir, tfrecord_name):
     :param tfrecord_name:
     :return:
     """
-    img_paths, labels = gen_img_path_and_label(dataset_dir)
+    img_paths, labels_0, labels_1 = gen_img_path_and_multi_label(dataset_dir)
     with tf.io.TFRecordWriter(path=tfrecord_name) as writer:
         logging.info('Writing {} to tfrecord'.format(dataset_dir))
-        for i in tqdm(range(len(labels)), desc='Converting'):
+        for i in tqdm(range(len(img_paths)), desc='Converting'):
             with open(str(img_paths[i]), 'rb') as f:
-                example = _build_example(f.read(), labels[i])
+                example = _build_example(f.read(), labels_0[i], labels_1[i])
                 writer.write(example.SerializeToString())
 
 

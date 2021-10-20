@@ -26,15 +26,21 @@ if __name__ == '__main__':
         # dirpath=SAVED_MODEL_DIR
     )
 
-    test_file = '/tmp/whiteboard/test5.jpg'
+    test_file = '/tmp/whiteboard/test.jpg'
     img = cv2.imread(test_file)
-    img = tf.convert_to_tensor(img, dtype=tf.float32)
-    img = tf.expand_dims(img, axis=0)
-    pred = model(img, training=False)
+    img = cv2.resize(img, (128, 128))
+    tensorimg = tf.convert_to_tensor(img, dtype=tf.float32)
+    tensorimg = tf.expand_dims(tensorimg, axis=0)
+    y0_pred, y1_pred = model(tensorimg, training=False)
 
-
-    print(pred)
-    print(INDEX_TO_LABEL[np.argmax(pred)])
+    keypoints = y1_pred.numpy().reshape((6, 2)).astype(dtype=np.int)
+    print(y0_pred)
+    print(y1_pred)
+    print(keypoints)
+    for p in keypoints:
+        cv2.circle(img, p, 3, (0, 255, 255), 3)
+    cv2.imwrite("result.jpg", img)
+    print(INDEX_TO_LABEL[np.argmax(y0_pred)])
 
 
     # 验证数据增强

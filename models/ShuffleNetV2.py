@@ -168,7 +168,9 @@ class ShuffleNetV2(tf.keras.Model):
             units=NUM_CLASSES,
             activation=tf.keras.activations.softmax
         )
-
+        self.fc1 = tf.keras.layers.Dense(
+            units=12
+        )
 
     def _build_block(self, repeat_num, in_channels, out_channels):
         block = tf.keras.Sequential()
@@ -190,8 +192,10 @@ class ShuffleNetV2(tf.keras.Model):
         x = self.bn2(x, training=training)
         x = tf.nn.relu(x)
         x = self.avg_pool(x)
+        y = self.fc1(x)
+
         x = self.fc(x)
-        return x
+        return x, y
 
 
 

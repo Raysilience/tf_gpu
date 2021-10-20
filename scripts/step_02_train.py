@@ -37,7 +37,7 @@ if __name__ == '__main__':
     train_data_loader = DataLoader(TRAIN_TFRECORD)
     valid_data_loader = DataLoader(VALID_TFRECORD)
 
-    train_dataset = train_data_loader.get_dataset(BATCH_SIZE, augment=True)
+    train_dataset = train_data_loader.get_dataset(BATCH_SIZE, augment=False)
     valid_dataset = valid_data_loader.get_dataset(BATCH_SIZE)
 
     total_train_num = train_data_loader.get_len()
@@ -70,7 +70,9 @@ if __name__ == '__main__':
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
-    loss_obj = tf.keras.losses.SparseCategoricalCrossentropy()
+    loss0_obj = tf.keras.losses.SparseCategoricalCrossentropy()
+    loss1_obj = tf.keras.losses.MeanSquaredError()
+
     train_loss = tf.keras.metrics.Mean(name='train_loss')
     train_acc = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
 
@@ -79,36 +81,41 @@ if __name__ == '__main__':
     prev_valid_loss = float('inf')
 
     @tf.function
-    def train_step(x, y):
+    def train_step(x, y0, y1):
         with tf.GradientTape() as tape:
-            y_pred = model(x, training=True)
-            loss = loss_obj(y_true=y, y_pred=y_pred)
+            y0_pred, y1_pred= model(x, training=True)
+            loss0 = loss0_obj(y_true=y0, y_pred=y0_pred)
+            loss1 = loss1_obj(y_true=y1, y_pred=y1_pred)
+            loss = loss0 + loss1
         grads = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(grads_and_vars=zip(grads, model.trainable_variables))
         train_loss.update_state(values=loss)
-        train_acc.update_state(y_true=y, y_pred=y_pred)
+        train_acc.update_state(y_true=y0, y_pred=y0_pred)
 
 
     @tf.function
-    def valid_step(x, y):
-        y_pred = model(x, training=False)
-        loss = loss_obj(y_true=y, y_pred=y_pred)
+    def valid_step(x, y0, y1):
+        y0_pred, y1_pred = model(x, training=False)
+        loss0 = loss0_obj(y_true=y0, y_pred=y0_pred)
+        loss1 = loss1_obj(y_true=y1, y_pred=y1_pred)
+        loss = loss0 + loss1
+
         valid_loss.update_state(values=loss)
-        valid_acc.update_state(y_true=y, y_pred=y_pred)
+        valid_acc.update_state(y_true=y0, y_pred=y0_pred)
 
 
     # training process
     # ==========================================================================
     for epoch in range(NUM_EPOCHS):
         step = 0
-        for image_batch, label_batch in tqdm(train_dataset, desc='training'):
-            train_step(image_batch, label_batch)
+        for image_batch, label_0_batch, label_1_batch in tqdm(train_dataset, desc='training'):
+            train_step(image_batch, label_0_batch, label_1_batch)
             step += 1
             if step > math.ceil(total_train_num/BATCH_SIZE):
                 break
 
-        for image_batch, label_batch in valid_dataset:
-            valid_step(image_batch, label_batch)
+        for image_batch,  label_0_batch, label_1_batch in valid_dataset:
+            valid_step(image_batch, label_0_batch, label_1_batch)
 
         print("Epoch: {}/{}, train loss: {:.5f}, train accuracy: {:.5f}, "
               "valid loss: {:.5f}, valid accuracy: {:.5f}".format(epoch,
