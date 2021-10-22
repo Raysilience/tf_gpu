@@ -55,7 +55,7 @@ class ModelSpecificInfo(object):
 
 
 _MODEL_INFO = {
-    'risc_V1_0_0.tflite':
+    'risc_V2_0_0.tflite':
         ModelSpecificInfo(
             name=MODEL_NAME,
             version=VERSION,
@@ -126,27 +126,46 @@ class MetadataPopulatorForImageClassifier(object):
         input_meta.stats = input_stats
 
         # Creates output info.
-        output_meta = _metadata_fb.TensorMetadataT()
-        output_meta.name = "probability"
-        output_meta.description = "Probabilities of the %d labels respectively." % self.model_info.num_classes
-        output_meta.content = _metadata_fb.ContentT()
-        output_meta.content.content_properties = _metadata_fb.FeaturePropertiesT()
-        output_meta.content.contentPropertiesType = (
+        output_class_meta = _metadata_fb.TensorMetadataT()
+        output_class_meta.name = "probability"
+        output_class_meta.description = "Probabilities of the %d labels respectively." % self.model_info.num_classes
+        output_class_meta.content = _metadata_fb.ContentT()
+        output_class_meta.content.content_properties = _metadata_fb.FeaturePropertiesT()
+        output_class_meta.content.contentPropertiesType = (
             _metadata_fb.ContentProperties.FeatureProperties)
-        output_stats = _metadata_fb.StatsT()
-        output_stats.max = [1.0]
-        output_stats.min = [0.0]
-        output_meta.stats = output_stats
+        # output_stats = _metadata_fb.StatsT()
+        # output_stats.max = [1.0]
+        # output_stats.min = [0.0]
+        # output_class_meta.stats = output_stats
         label_file = _metadata_fb.AssociatedFileT()
         label_file.name = os.path.basename(self.label_file_path)
         label_file.description = "Labels for objects that the model can recognize."
         label_file.type = _metadata_fb.AssociatedFileType.TENSOR_AXIS_LABELS
-        output_meta.associatedFiles = [label_file]
+        output_class_meta.associatedFiles = [label_file]
+
+        output_point_meta = _metadata_fb.TensorMetadataT()
+        output_point_meta.name = "points"
+        output_point_meta.description = "points location."
+        output_point_meta.content = _metadata_fb.ContentT()
+        output_point_meta.content.contentPropertiesType = (
+            _metadata_fb.ContentProperties.FeatureProperties)
+        output_point_meta.content.contentProperties = (
+            _metadata_fb.FeaturePropertiesT())
+        output_point_meta.content.range = _metadata_fb.ValueRangeT()
+        output_point_meta.content.range.min = 12
+        output_point_meta.content.range.max = 12
 
         # Creates subgraph info.
+        group = _metadata_fb.TensorGroupT()
+        group.name = "detection result"
+        group.tensorNames = [
+            output_class_meta.name, output_point_meta.name
+        ]
+
         subgraph = _metadata_fb.SubGraphMetadataT()
         subgraph.inputTensorMetadata = [input_meta]
-        subgraph.outputTensorMetadata = [output_meta]
+        subgraph.outputTensorMetadata = [output_class_meta, output_point_meta]
+        subgraph.outputTensorGroups = [group]
         model_meta.subgraphMetadata = [subgraph]
 
         b = flatbuffers.Builder(0)

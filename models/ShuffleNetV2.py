@@ -193,8 +193,8 @@ class ShuffleNetV2(tf.keras.Model):
         x = tf.nn.relu(x)
         x = self.avg_pool(x)
         y = self.fc1(x)
-
         x = self.fc(x)
+
         return x, y
 
 

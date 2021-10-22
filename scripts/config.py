@@ -10,7 +10,7 @@
 
 DEVICE = 'GPU'
 MODEL_NAME = 'risc'
-VERSION = 'V1_0_0'
+VERSION = 'V2_0_0'
 
 # training params
 NUM_EPOCHS = 300

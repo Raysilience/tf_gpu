@@ -45,8 +45,8 @@ if __name__ == '__main__':
     tf.config.experimental.set_memory_growth(device=gpus[0], enable=True)
     tflite_model_path = "{0}{1}_{2}.tflite".format(SAVED_MODEL_DIR, MODEL_NAME, VERSION)
 
-    convert_on = False
-    test_on = True
+    convert_on = True
+    test_on = False
 
     if convert_on:
         # 转换tflite格式
