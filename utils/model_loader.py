@@ -24,12 +24,12 @@ def load(mode, filepath=None, dirpath=None):
     """
     if mode == 0:
         # model = CNN()
-        model = ShuffleNetV2.shufflenet_0_1x()
+        model = ShuffleNetV2.shufflenet_0_5x()
 
     # load model from saved weights
     elif mode == 1:
         # model = CNN()
-        model = ShuffleNetV2.shufflenet_0_1x()
+        model = ShuffleNetV2.shufflenet_0_5x()
         model.load_weights(filepath=filepath)
 
     # load model from saved model

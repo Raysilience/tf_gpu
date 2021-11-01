@@ -1,25 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="root@192.168.31.165:6666" autoUploadExternalChanges="true">
+  <component name="PublishConfigData" autoUpload="Always" serverName="root@10.124.50.252:6666 (2)" autoUploadExternalChanges="true">
     <serverData>
+      <paths name="252_tf_gpu">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@10.124.50.252:6666">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/whiteboard" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@10.124.50.252:6666 (2)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/whiteboard" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="root@192.168.31.165:6666">
         <serverdata>
           <mappings>
             <mapping deploy="/tmp/whiteboard" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="root@192.168.31.165:8080">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/tmp/whiteboard" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="tf_gpu">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/tmp/whiteboard" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

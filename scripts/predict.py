@@ -26,7 +26,7 @@ if __name__ == '__main__':
         # dirpath=SAVED_MODEL_DIR
     )
 
-    test_file = '/tmp/whiteboard/test.jpg'
+    test_file = '/tmp/whiteboard/test5.jpg'
     img = cv2.imread(test_file)
     img = cv2.resize(img, (128, 128))
     tensorimg = tf.convert_to_tensor(img, dtype=tf.float32)

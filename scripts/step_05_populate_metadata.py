@@ -55,7 +55,7 @@ class ModelSpecificInfo(object):
 
 
 _MODEL_INFO = {
-    'risc_V2_0_0.tflite':
+    'risc_V2_0_2.tflite':
         ModelSpecificInfo(
             name=MODEL_NAME,
             version=VERSION,

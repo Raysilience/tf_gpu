@@ -28,7 +28,7 @@ if __name__ == '__main__':
     # ==========================================================================
     model = model_loader.load(
         mode=1,
-        filepath=SAVED_MODEL_DIR+'best',
+        filepath=SAVED_MODEL_DIR+'best'
         # dirpath=SAVED_MODEL_DIR
     )
 
@@ -86,7 +86,7 @@ if __name__ == '__main__':
             y0_pred, y1_pred= model(x, training=True)
             loss0 = loss0_obj(y_true=y0, y_pred=y0_pred)
             loss1 = loss1_obj(y_true=y1, y_pred=y1_pred)
-            loss = loss0 + loss1
+            loss = loss0 + 2*loss1
         grads = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(grads_and_vars=zip(grads, model.trainable_variables))
         train_loss.update_state(values=loss)
@@ -98,7 +98,7 @@ if __name__ == '__main__':
         y0_pred, y1_pred = model(x, training=False)
         loss0 = loss0_obj(y_true=y0, y_pred=y0_pred)
         loss1 = loss1_obj(y_true=y1, y_pred=y1_pred)
-        loss = loss0 + loss1
+        loss = loss0 + 2*loss1
 
         valid_loss.update_state(values=loss)
         valid_acc.update_state(y_true=y0, y_pred=y0_pred)
