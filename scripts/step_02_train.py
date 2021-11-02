@@ -17,8 +17,8 @@ if __name__ == '__main__':
 
     gpus = tf.config.list_physical_devices(device_type='GPU')
     tf.config.set_visible_devices(devices=gpus[0], device_type='GPU')
-    for gpu in gpus:
-        tf.config.experimental.set_memory_growth(device=gpus[0], enable=True)
+    # for gpu in gpus:
+    tf.config.experimental.set_memory_growth(device=gpus[0], enable=True)
         # tf.config.set_logical_device_configuration(
         #     device=gpus[0],
         #     logical_devices=[tf.config.LogicalDeviceConfiguration(memory_limit=0)]
