@@ -23,6 +23,7 @@ def convert_to_tflite(original_saved_model_dir, export_path, quantized=False):
     # 加载模型
     model = model_loader.load(
         mode=1,
+        model_name='MobileNetV2',
         filepath=SAVED_MODEL_DIR+'best',
         # dirpath=SAVED_MODEL_DIR
     )

@@ -7,14 +7,32 @@
 @Author     :Rui
 @Desc       :
 '''
-from models import ShuffleNetV2
-from models.CNN import CNN
+from models import ShuffleNetV2, MobileNetV2
 
 from scripts.config import *
 import tensorflow as tf
 
 
-def load(mode, filepath=None, dirpath=None):
+def _select_model(model):
+    if model is None:
+        raise RuntimeError('cannot load none object')
+    elif model == 'ShuffleNet_0_1x':
+        return ShuffleNetV2.shufflenet_0_1x()
+    elif model == 'ShuffleNet_0_5x':
+        return ShuffleNetV2.shufflenet_0_5x()
+    elif model == 'ShuffleNet_1_0x':
+        return ShuffleNetV2.shufflenet_1_0x()
+    elif model == 'ShuffleNet_1_5x':
+        return ShuffleNetV2.shufflenet_1_5x()
+    elif model == 'ShuffleNet_2_0x':
+        return ShuffleNetV2.shufflenet_2_0x()
+    elif model == 'MobileNetV2':
+        return MobileNetV2.MobileNetV2()
+    else:
+        raise ValueError(model + ' is not support yet')
+
+
+def load(mode, model_name=None, filepath=None, dirpath=None):
     """
     load model from previously saved model or weights
     :param mode: 0 means loading a newly build model, 1 means loading from saved weights, 2 means loading from saved model
@@ -23,13 +41,11 @@ def load(mode, filepath=None, dirpath=None):
     :return: keras model object
     """
     if mode == 0:
-        # model = CNN()
-        model = ShuffleNetV2.shufflenet_0_5x()
+        model = _select_model(model_name)
 
     # load model from saved weights
     elif mode == 1:
-        # model = CNN()
-        model = ShuffleNetV2.shufflenet_0_5x()
+        model = _select_model(model_name)
         model.load_weights(filepath=filepath)
 
     # load model from saved model

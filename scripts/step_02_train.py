@@ -27,8 +27,9 @@ if __name__ == '__main__':
     # create model
     # ==========================================================================
     model = model_loader.load(
-        mode=1,
-        filepath=SAVED_MODEL_DIR+'best'
+        mode=0,
+        model_name='MobileNetV2'
+        # filepath=SAVED_MODEL_DIR+'best'
         # dirpath=SAVED_MODEL_DIR
     )
 

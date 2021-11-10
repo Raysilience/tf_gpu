@@ -22,11 +22,12 @@ if __name__ == '__main__':
     # 加载模型
     model = model_loader.load(
         mode=1,
+        model_name='MobileNetV2',
         filepath=SAVED_MODEL_DIR+'best',
         # dirpath=SAVED_MODEL_DIR
     )
 
-    test_file = '/tmp/whiteboard/test5.jpg'
+    test_file = '/tmp/whiteboard/test4.jpg'
     img = cv2.imread(test_file)
     img = cv2.resize(img, (128, 128))
     tensorimg = tf.convert_to_tensor(img, dtype=tf.float32)
