@@ -164,6 +164,7 @@ class MobileNetV2(tf.keras.Model):
         # x = self.avg_pool(x)
         # x = self.conv3(x)
         # x = tf.nn.softmax(x)
+        # return x
 
         x = self.global_avg_pool(x)
         y = self.fc1(x)

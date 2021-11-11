@@ -7,7 +7,7 @@
 @Author     :Rui
 @Desc       :
 '''
-from models import ShuffleNetV2, MobileNetV2
+from models import ShuffleNetV2, MobileNetV2, MobileNetV1
 
 from scripts.config import *
 import tensorflow as tf
@@ -26,6 +26,14 @@ def _select_model(model):
         return ShuffleNetV2.shufflenet_1_5x()
     elif model == 'ShuffleNet_2_0x':
         return ShuffleNetV2.shufflenet_2_0x()
+
+    elif model == 'MobileNetV1_0_5x':
+        return MobileNetV1.MobileNetV1(alpha=0.5)
+    elif model == 'MobileNetV1_0_75x':
+        return MobileNetV1.MobileNetV1(alpha=0.75)
+    elif model == 'MobileNetV1_1_0x':
+        return MobileNetV1.MobileNetV1()
+
     elif model == 'MobileNetV2':
         return MobileNetV2.MobileNetV2()
     else:
