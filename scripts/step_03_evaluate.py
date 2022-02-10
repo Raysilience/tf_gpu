@@ -33,8 +33,8 @@ if __name__ == '__main__':
 
     # 模型评估
     test_acc = tf.keras.metrics.SparseCategoricalAccuracy()
-    for x_test, y0_test, y1_test in tqdm(dataset, desc='evaluating test performance'):
-        y0_pred, y1_pred = model(x_test, training=False)
+    for x_test, y0_test in tqdm(dataset, desc='evaluating test performance'):
+        y0_pred = model(x_test, training=False)
         test_acc.update_state(y_true=y0_test, y_pred=y0_pred)
 
     print("test accuracy: {:.5f}".format(test_acc.result()))

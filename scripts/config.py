@@ -1,41 +1,36 @@
 #!usr/bin/env python
 # coding utf-8
-'''
-@File       :config.py.py
+"""
+@File       :config.py
 @Copyright  :CV Group
-@Date       :9/26/2021
+@Date       :2/9/2022
 @Author     :Rui
 @Desc       :
-'''
+"""
 
 DEVICE = 'GPU'
-MODEL_NAME = 'risc'
-VERSION = 'V2_0_2'
+MODEL_NAME = 'irHand'
+VERSION = 'V1_0_0'
 
 # training params
 NUM_EPOCHS = 300
 BATCH_SIZE = 64
-NUM_CLASSES = 6
+NUM_CLASSES = 5
 
-IMAGE_WIDTH = 128
-IMAGE_HEIGHT = 128
-CHANNELS = 3
-SCALING_FACTOR = 0.7
+IMAGE_WIDTH = 320
+IMAGE_HEIGHT = 240
+CHANNELS = 2
 
 # model saving directory
-SAVED_MODEL_DIR = '/tmp/whiteboard/saved_model/'
-SAVE_EVERY_N_EPOCH = 100
+SAVED_MODEL_DIR = '/tmp/irHand/saved_model/'
+SAVE_EVERY_N_EPOCH = 30
 
 # training summary directory
-SUMMARY_DIR = '/tmp/whiteboard/tensorboard'
-
-# generate metadata
-EXPORT_METADATA_DIR = SAVED_MODEL_DIR + 'meta/'
-LABEL_FILE = '/tmp/whiteboard/label.txt'
+SUMMARY_DIR = '/tmp/irHand/tensorboard'
 
 # dataset directories
-RAW_DATA_DIR = '/tmp/whiteboard/raw_data/'
-DATASET_DIR = '/tmp/whiteboard/dataset/'
+RAW_DATA_DIR = '/share/irHandData/raw'
+DATASET_DIR = '/share/irHandData/'
 TRAIN_DIR = DATASET_DIR + 'train'
 VALID_DIR = DATASET_DIR + 'valid'
 TEST_DIR = DATASET_DIR + 'test'

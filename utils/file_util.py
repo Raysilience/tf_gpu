@@ -30,6 +30,7 @@ def clear_dir(dirname):
     if p.exists():
         shutil.rmtree(str(p))
 
+
 def gen_img_path_and_label(data_root_dir):
     """
     given root dir, generate image paths and labels correspondingly
@@ -39,8 +40,8 @@ def gen_img_path_and_label(data_root_dir):
     root = Path(data_root_dir)
     if not root.exists():
         raise ValueError('source directory not exist')
-    img_path = list(root.glob('*/*'))
-    label = [LABEL_TO_INDEX[p.stem.split('_')[0]] for p in img_path]
+    img_path = list(root.glob('*'))
+    label = [int(p.stem.split('_')[1]) for p in img_path]
     return img_path, label
 
 
@@ -65,7 +66,7 @@ def gen_img_path_and_multi_label(data_root_dir):
 
 
 
-def _build_example(image_string, labels_0, labels_1):
+def _build_example(image_string, labels_0):
     """
     create a tf.train.Example from features
     :param image_string: binary representation of image
@@ -74,8 +75,8 @@ def _build_example(image_string, labels_0, labels_1):
     :return: tf.train.Example object
     """
     feature = {
-        'label_0': tf.train.Feature(int64_list=tf.train.Int64List(value=[labels_0])),
-        'label_1': tf.train.Feature(int64_list=tf.train.Int64List(value=labels_1)),
+        'label': tf.train.Feature(int64_list=tf.train.Int64List(value=[labels_0])),
+        # 'label_1': tf.train.Feature(int64_list=tf.train.Int64List(value=labels_1)),
         'image': tf.train.Feature(bytes_list=tf.train.BytesList(value=[image_string]))
     }
 
@@ -89,12 +90,12 @@ def dataset_to_tfrecord(dataset_dir, tfrecord_name):
     :param tfrecord_name:
     :return:
     """
-    img_paths, labels_0, labels_1 = gen_img_path_and_multi_label(dataset_dir)
+    img_paths, labels = gen_img_path_and_label(dataset_dir)
     with tf.io.TFRecordWriter(path=tfrecord_name) as writer:
         logging.info('Writing {} to tfrecord'.format(dataset_dir))
         for i in tqdm(range(len(img_paths)), desc='Converting'):
             with open(str(img_paths[i]), 'rb') as f:
-                example = _build_example(f.read(), labels_0[i], labels_1[i])
+                example = _build_example(f.read(), labels[i])
                 writer.write(example.SerializeToString())
 
 

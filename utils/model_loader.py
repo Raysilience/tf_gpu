@@ -57,9 +57,13 @@ def load(mode, model_name=None, filepath=None, dirpath=None):
         model.load_weights(filepath=filepath)
 
     # load model from saved model
-    else:
+    elif mode == 2:
         # model = tf.saved_model.load(dirpath)
         model = tf.keras.models.load_model(dirpath)
+
+    else:
+        raise ValueError("mode not implemented")
+
 
     return model
 

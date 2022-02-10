@@ -19,8 +19,7 @@ class DataLoader:
         if labeled:
             self.tfrecord_format = {
                 'image': tf.io.FixedLenFeature([], tf.string),
-                'label_0': tf.io.FixedLenFeature([], tf.int64),
-                'label_1': tf.io.FixedLenFeature([12], tf.int64)
+                'label': tf.io.FixedLenFeature([], tf.int64),
             }
         else:
             self.tfrecord_format = {
@@ -29,9 +28,8 @@ class DataLoader:
         self.dataset = None
 
     def _decode_image(self, image):
-        img = tf.image.decode_jpeg(image, channels=3)
-        img = tf.cast(img, tf.float32)
-        img = tf.reshape(img, [IMAGE_WIDTH, IMAGE_HEIGHT, 3])
+        img = tf.io.decode_raw(image, out_type=tf.float32)
+        img = tf.reshape(img, [IMAGE_HEIGHT, IMAGE_WIDTH, CHANNELS])
         return img
 
     def _read_tfrecord(self, example_string):
@@ -43,9 +41,8 @@ class DataLoader:
         example = tf.io.parse_single_example(example_string, self.tfrecord_format)
         image = self._decode_image(example['image'])
         if self.labeled:
-            label_0 = tf.cast(example['label_0'], tf.int64)
-            label_1 = tf.cast(example['label_1'], tf.int64)
-            return image, label_0, label_1
+            label = tf.cast(example['label'], tf.int64)
+            return image, label
         return image
 
     def _load_dataset(self, ordered=False):
@@ -109,11 +106,10 @@ if __name__ == '__main__':
     )
 
     cnt = 0
-    for img_batch, label_0_batch, label_1_batch in dataset:
+    for img_batch, label_0_batch in dataset:
         for i in range(len(img_batch)):
             print(img_batch[i])
             print(label_0_batch[i])
-            print(label_1_batch[i])
 
             break
         break

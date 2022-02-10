@@ -1,7 +1,7 @@
 #!usr/bin/env python
 # coding utf-8
 '''
-@File       :shape_util.py
+@File       :image_util.py
 @Copyright  :CV Group
 @Date       :9/27/2021
 @Author     :Rui
@@ -11,6 +11,40 @@ import json
 
 import numpy as np
 import cv2
+from pathlib import Path
+import pandas as pd
+
+def load_and_preprocess_image(img_file: Path):
+    """
+    load image and preprocess image
+    :param img_file: Path object
+    :return: tensor
+    """
+    depth_file_name = img_file.name
+    ir_file = str(img_file.parent) + "/" + depth_file_name.replace('Depth', "IR")
+    # label = img_file.stem.split('_')[1]
+
+    depth_df = pd.read_csv(str(img_file), header=None)
+    ir_df = pd.read_csv(ir_file, header=None)
+
+    depth_img = depth_df.to_numpy()
+    ir_img = ir_df.to_numpy()
+
+    return preprocess_image(depth_img, ir_img)
+
+
+def preprocess_image(depth_img, ir_img):
+    """
+    preprocess images including scaling, stacking etc.
+    :param depth_img: numpy array
+    :param ir_img: numpy array
+    :return: tensor
+    """
+    depth_img = np.where((depth_img < 3000) & (depth_img > 100), depth_img / 3000.0, 0.0)
+    ir_img = np.where((ir_img > 20), ir_img / np.max(ir_img), 0.0)
+    comb_tensor = np.stack([ir_img, depth_img], axis=2)
+    comb_tensor = comb_tensor.astype(dtype=np.float32)
+    return comb_tensor
 
 def gen_image_from_points(pts, rect_x, rect_y, rect_w, rect_h, width=128, height=128, scale=1):
     """
