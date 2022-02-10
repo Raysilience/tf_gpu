@@ -1,7 +1,7 @@
 #!usr/bin/env python
 # coding utf-8
 '''
-@File       :FileUtil.py
+@File       :file_util.py
 @Copyright  :CV Group
 @Date       :9/26/2021
 @Author     :Rui

@@ -167,10 +167,10 @@ class MobileNetV2(tf.keras.Model):
         # return x
 
         x = self.global_avg_pool(x)
-        y = self.fc1(x)
+        # y = self.fc1(x)
         x = self.fc(x)
 
-        return x, y
+        return x
 
     def _build_bottleneck(self, input_channels, output_channels, expand_factor, stride, repeat_num):
         block = tf.keras.Sequential()

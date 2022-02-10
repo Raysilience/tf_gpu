@@ -15,7 +15,7 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
-from utils import ShapeUtil, FileUtil
+from utils import shape_util, file_util
 from config import *
 
 def gen_saving_dir(root_dir, is_random=True, category="train"):
@@ -55,9 +55,9 @@ if __name__ == '__main__':
         LABEL_DIR = DATASET_DIR + '/label/'
 
         if CLEAR_PREVIOUS_DIR:
-            FileUtil.clear_dir(DATASET_DIR)
+            file_util.clear_dir(DATASET_DIR)
         # create label directory
-        FileUtil.make_dir(LABEL_DIR)
+        file_util.make_dir(LABEL_DIR)
 
         for p in tqdm(root.glob('*.json'), desc='Processing'):
             with open(str(p), 'r') as f:
@@ -75,18 +75,18 @@ if __name__ == '__main__':
 
                 # 处理图片
                 folder = folder.joinpath(cls)
-                FileUtil.make_dir(folder)
+                file_util.make_dir(folder)
                 filename = str(folder.joinpath('{0}.jpg'.format(p.stem)))
                 rect = cv2.boundingRect(pts)
                 x, y, w, h = rect
-                img = ShapeUtil.gen_image_from_points(pts, x, y, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, scale=SCALING_FACTOR)
+                img = shape_util.gen_image_from_points(pts, x, y, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, scale=SCALING_FACTOR)
                 cv2.imwrite(filename, img)
 
                 # 处理标签
                 res['label'] = LABEL_TO_INDEX[data['label']]
                 if res['label'] > 1:
                     points = data['descriptor']
-                    points = ShapeUtil.map_points(points, x, y, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, scale=SCALING_FACTOR).tolist()
+                    points = shape_util.map_points(points, x, y, w, h, IMAGE_WIDTH, IMAGE_HEIGHT, scale=SCALING_FACTOR).tolist()
                     for i in range(len(data['descriptor'])):
                         res['descriptor'][2*i] = points[i][0]
                         res['descriptor'][2*i+1] = points[i][1]
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     # step2. convert hierarchical data into tfrecord
     if CONVERT_TFRECORD:
-        FileUtil.dataset_to_tfrecord(TRAIN_DIR, TRAIN_TFRECORD)
-        FileUtil.dataset_to_tfrecord(VALID_DIR, VALID_TFRECORD)
-        FileUtil.dataset_to_tfrecord(TEST_DIR, TEST_TFRECORD)
+        file_util.dataset_to_tfrecord(TRAIN_DIR, TRAIN_TFRECORD)
+        file_util.dataset_to_tfrecord(VALID_DIR, VALID_TFRECORD)
+        file_util.dataset_to_tfrecord(TEST_DIR, TEST_TFRECORD)
 
