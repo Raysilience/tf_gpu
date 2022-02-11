@@ -42,6 +42,8 @@ def preprocess_image(depth_img, ir_img):
     """
     depth_img = np.where((depth_img < 3000) & (depth_img > 100), depth_img / 3000.0, 0.0)
     ir_img = np.where((ir_img > 20), ir_img / np.max(ir_img), 0.0)
+    # ir_img = np.zeros(ir_img.shape)
+    # depth_img = np.zeros(ir_img.shape)
     comb_tensor = np.stack([ir_img, depth_img], axis=2)
     comb_tensor = comb_tensor.astype(dtype=np.float32)
     return comb_tensor
