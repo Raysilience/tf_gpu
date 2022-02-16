@@ -59,7 +59,7 @@ if __name__ == '__main__':
     # )
     learning_rate = tf.keras.optimizers.schedules.InverseTimeDecay(
         # 1e-2, 3e-3, 1e-3, 3e-4,1e-4
-        initial_learning_rate=1e-3,
+        initial_learning_rate=3e-4,
         decay_steps=50,
         decay_rate=0.1,
         staircase=True

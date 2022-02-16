@@ -138,7 +138,7 @@ class MobileNetV2(tf.keras.Model):
 
         self.fc = tf.keras.layers.Dense(
             units=NUM_CLASSES,
-            activation=tf.keras.activations.softmax
+            activation=tf.keras.activations.sigmoid
         )
         self.fc1 = tf.keras.layers.Dense(
             units=12
