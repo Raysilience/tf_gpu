@@ -20,18 +20,15 @@ class BottleNeck(tf.keras.layers.Layer):
         :param stride: stride to control spatial property
         """
         super(BottleNeck, self).__init__()
-        self.input_channels = input_channels
-        self.output_channels = output_channels
-        self.stride = stride
-        self.conv1 = tf.keras.layers.Conv2D(filters=self.input_channels,
+        self.conv1 = tf.keras.layers.Conv2D(filters=input_channels,
                                             kernel_size=(1, 1),
                                             padding='same',
                                             strides=1)
-        self.conv2 = tf.keras.layers.Conv2D(filters=self.input_channels,
+        self.conv2 = tf.keras.layers.Conv2D(filters=input_channels,
                                             kernel_size=(3, 3),
                                             padding='same',
                                             strides=stride)
-        self.conv3 = tf.keras.layers.Conv2D(filters=self.output_channels,
+        self.conv3 = tf.keras.layers.Conv2D(filters=output_channels,
                                             kernel_size=(1, 1),
                                             padding='same',
                                             strides=1)
@@ -39,12 +36,15 @@ class BottleNeck(tf.keras.layers.Layer):
         self.bn2 = tf.keras.layers.BatchNormalization()
         self.bn3 = tf.keras.layers.BatchNormalization()
 
-        self.downsample = tf.keras.Sequential()
-        self.downsample.add(tf.keras.layers.Conv2D(filters=self.output_channels,
-                                                   kernel_size=(1, 1),
-                                                   padding='same',
-                                                   strides=stride))
-        self.downsample.add(tf.keras.layers.BatchNormalization())
+        if stride == 1:
+            self.down_sample = lambda x, training: x
+        else:
+            self.down_sample = tf.keras.Sequential()
+            self.down_sample.add(tf.keras.layers.Conv2D(filters=output_channels,
+                                                        kernel_size=(1, 1),
+                                                        padding='same',
+                                                        strides=stride))
+            self.down_sample.add(tf.keras.layers.BatchNormalization())
 
     def call(self, inputs, training=None, **kwargs):
         x = self.conv1(inputs)
@@ -58,10 +58,8 @@ class BottleNeck(tf.keras.layers.Layer):
         x = self.conv3(x)
         x = self.bn3(x, training=training)
 
-        res = inputs
-        if self.stride != 1 and self.input_channels != self.output_channels:
-            res = self.downsample(inputs, training=training)
-        x += res
+        residual = self.down_sample(inputs, training=training)
+        x += residual
         x = tf.nn.relu(x)
 
         return x
@@ -76,7 +74,6 @@ class BasicBlock(tf.keras.layers.Layer):
         :param stride: default set to 1
         """
         super(BasicBlock, self).__init__()
-        self.stride = stride
         self.conv1 = tf.keras.layers.Conv2D(filters=input_channels,
                                             kernel_size=(3, 3),
                                             padding='same',
@@ -89,25 +86,28 @@ class BasicBlock(tf.keras.layers.Layer):
         self.bn1 = tf.keras.layers.BatchNormalization()
         self.bn2 = tf.keras.layers.BatchNormalization()
 
-        self.downsample = tf.keras.Sequential()
-        self.downsample.add(tf.keras.layers.Conv2D(filters=output_channels,
-                                                   kernel_size=(1, 1),
-                                                   padding='same',
-                                                   strides=stride))
-        self.downsample.add(tf.keras.layers.BatchNormalization())
+        if stride == 1:
+            self.down_sample = lambda x, training: x
+        else:
+            self.down_sample = tf.keras.Sequential()
+            self.down_sample.add(tf.keras.layers.Conv2D(filters=output_channels,
+                                                        kernel_size=(1, 1),
+                                                        padding='same',
+                                                        strides=stride))
+            self.down_sample.add(tf.keras.layers.BatchNormalization())
 
     def call(self, inputs, training=None, **kwargs):
-        residual = inputs
         x = self.conv1(inputs)
         x = self.bn1(x, training=training)
         x = tf.nn.relu(x)
+
         x = self.conv2(x)
         x = self.bn2(x, training=training)
-        if self.stride != 1:
-            residual = self.downsample(residual, training=training)
+        residual = self.down_sample(inputs, training=training)
         x += residual
         x = tf.nn.relu(x)
         return x
+
 
 def _build_blocks(block_type, input_channels, output_channels, stride, repeat_num):
     layer = tf.keras.Sequential()
@@ -119,7 +119,7 @@ def _build_blocks(block_type, input_channels, output_channels, stride, repeat_nu
 
 class ResNet(tf.keras.Model):
     def __init__(self, num_classes, block_type, layer_params, **kwargs):
-        super(ResNet, self).__init__()
+        super(ResNet, self).__init__(**kwargs)
         if 'name' in kwargs:
             self.model_name = kwargs.get('name')
 
@@ -133,20 +133,22 @@ class ResNet(tf.keras.Model):
         self.max_pool = tf.keras.layers.MaxPool2D(pool_size=(3, 3),
                                                   padding='same',
                                                   strides=2)
-        self.avg_pool = tf.keras.layers.GlobalAvgPool2D()
+        self.global_avg_pool = tf.keras.layers.GlobalAveragePooling2D()
         self.fc = tf.keras.layers.Dense(units=num_classes,
-                                        activation=tf.nn.softmax)
+                                        activation=tf.keras.activations.softmax)
         self.blocks = []
         for param in layer_params:
             self.blocks.append(_build_blocks(self.block_type, param[0], param[1], param[2], param[3]))
+
 
     def call(self, inputs, training=None, mask=None):
         x = self.conv(inputs)
         x = self.bn(x, training=training)
         x = tf.nn.relu(x)
+        x = self.max_pool(x)
         for block in self.blocks:
             x = block(x)
-        x = self.avg_pool(x)
+        x = self.global_avg_pool(x)
         x = self.fc(x)
         return x
 

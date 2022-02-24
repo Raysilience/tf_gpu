@@ -24,11 +24,13 @@ if __name__ == '__main__':
     # create model
     # ==========================================================================
     model = model_loader.load(
-        mode=1,
-        model_name='MobileNetV2',
+        mode=0,
+        model_name='ResNet18',
         filepath=SAVED_MODEL_DIR+'best',
         dirpath=SAVED_MODEL_DIR
     )
+    # model.build(input_shape=(None, IMAGE_HEIGHT, IMAGE_WIDTH, CHANNELS))
+    # model.summary()
 
     # create dataloader
     # ==========================================================================

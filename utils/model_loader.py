@@ -7,7 +7,7 @@
 @Author     :Rui
 @Desc       :
 '''
-from models import ShuffleNetV2, MobileNetV2, MobileNetV1
+from models import ShuffleNetV2, MobileNetV2, MobileNetV1, ResNet
 
 from scripts.config import *
 import tensorflow as tf
@@ -33,9 +33,20 @@ def _select_model(model):
         return MobileNetV1.MobileNetV1(alpha=0.75)
     elif model == 'MobileNetV1_1_0x':
         return MobileNetV1.MobileNetV1()
-
     elif model == 'MobileNetV2':
         return MobileNetV2.MobileNetV2()
+
+    elif model == 'ResNet18':
+        return ResNet.resnet18(NUM_CLASSES)
+    elif model == 'ResNet34':
+        return ResNet.resnet34(NUM_CLASSES)
+    elif model == 'ResNet50':
+        return ResNet.resnet50(NUM_CLASSES)
+    elif model == 'ResNet101':
+        return ResNet.resnet101(NUM_CLASSES)
+    elif model == 'ResNet152':
+        return ResNet.resnet152(NUM_CLASSES)
+
     else:
         raise ValueError(model + ' is not support yet')
 
