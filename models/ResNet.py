@@ -7,17 +7,16 @@
 @Author     :Rui
 @Desc       :
 """
-
 import tensorflow as tf
 
-
 class BottleNeck(tf.keras.layers.Layer):
-    def __init__(self, input_channels, output_channels, stride):
+    def __init__(self, input_channels, output_channels, stride, shortcut_dim_raising=False):
         """
         implement bottleneck blocks
         :param input_channels: number of input_channels
         :param output_channels: number of output channels
         :param stride: stride to control spatial property
+        :param shortcut_dim_raising: raise the dimension of shortcut default set to False. only used for the very first layer.
         """
         super(BottleNeck, self).__init__()
         self.conv1 = tf.keras.layers.Conv2D(filters=input_channels,
@@ -36,7 +35,7 @@ class BottleNeck(tf.keras.layers.Layer):
         self.bn2 = tf.keras.layers.BatchNormalization()
         self.bn3 = tf.keras.layers.BatchNormalization()
 
-        if stride == 1:
+        if stride == 1 and not shortcut_dim_raising:
             self.down_sample = lambda x, training: x
         else:
             self.down_sample = tf.keras.Sequential()
@@ -66,12 +65,13 @@ class BottleNeck(tf.keras.layers.Layer):
 
 
 class BasicBlock(tf.keras.layers.Layer):
-    def __init__(self, input_channels, output_channels, stride):
+    def __init__(self, input_channels, output_channels, stride, shortcut_dim_raising=False):
         """
         build basic block with two consecutive conv3*3
         :param input_channels:
         :param output_channels:
         :param stride: default set to 1
+        :param shortcut_dim_raising: raise the dimension of shortcut default set to False. not used in the resnet paper.
         """
         super(BasicBlock, self).__init__()
         self.conv1 = tf.keras.layers.Conv2D(filters=input_channels,
@@ -86,7 +86,7 @@ class BasicBlock(tf.keras.layers.Layer):
         self.bn1 = tf.keras.layers.BatchNormalization()
         self.bn2 = tf.keras.layers.BatchNormalization()
 
-        if stride == 1:
+        if stride == 1 and not shortcut_dim_raising:
             self.down_sample = lambda x, training: x
         else:
             self.down_sample = tf.keras.Sequential()
@@ -109,9 +109,9 @@ class BasicBlock(tf.keras.layers.Layer):
         return x
 
 
-def _build_blocks(block_type, input_channels, output_channels, stride, repeat_num):
+def _build_blocks(block_type, input_channels, output_channels, stride, repeat_num, shortcut_dim_raising):
     layer = tf.keras.Sequential()
-    layer.add(block_type(input_channels, output_channels, stride))
+    layer.add(block_type(input_channels, output_channels, stride, shortcut_dim_raising))
     for _ in range(1, repeat_num):
         layer.add(block_type(input_channels, output_channels, 1))
     return layer
@@ -136,10 +136,12 @@ class ResNet(tf.keras.Model):
         self.global_avg_pool = tf.keras.layers.GlobalAveragePooling2D()
         self.fc = tf.keras.layers.Dense(units=num_classes,
                                         activation=tf.keras.activations.softmax)
+
+        self.shortcut_dim_raising = True
         self.blocks = []
         for param in layer_params:
-            self.blocks.append(_build_blocks(self.block_type, param[0], param[1], param[2], param[3]))
-
+            self.blocks.append(_build_blocks(self.block_type, param[0], param[1], param[2], param[3], self.shortcut_dim_raising))
+            self.shortcut_dim_raising = False
 
     def call(self, inputs, training=None, mask=None):
         x = self.conv(inputs)

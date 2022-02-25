@@ -7,7 +7,6 @@
 @Author     :Rui
 @Desc       :
 '''
-import cv2
 import tensorflow as tf
 from scripts.config import *
 

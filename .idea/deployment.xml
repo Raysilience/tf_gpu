@@ -12,7 +12,7 @@
       <paths name="root@10.124.50.252:6666 (2)">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/tof" local="$PROJECT_DIR$" />
+            <mapping deploy="/tmp/irHand" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

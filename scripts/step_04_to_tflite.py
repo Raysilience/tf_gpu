@@ -9,7 +9,7 @@
 '''
 import numpy as np
 import tensorflow as tf
-from config import *
+from scripts.config import *
 from utils import model_loader
 
 

@@ -1,11 +1,10 @@
 import math
-from pathlib import Path
 
 import tensorflow as tf
 from tqdm import tqdm
 
 from utils import model_loader
-from scripts.config import *
+from config import *
 from utils.data_loader import DataLoader
 
 if __name__ == '__main__':
@@ -25,7 +24,7 @@ if __name__ == '__main__':
     # ==========================================================================
     model = model_loader.load(
         mode=0,
-        model_name='ResNet18',
+        model_name='ResNet50',
         filepath=SAVED_MODEL_DIR+'best',
         dirpath=SAVED_MODEL_DIR
     )

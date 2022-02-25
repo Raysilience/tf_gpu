@@ -12,8 +12,7 @@ from tqdm import tqdm
 
 from utils import model_loader
 from utils.data_loader import DataLoader
-import models.ShuffleNetV2 as ShuffleNetV2
-from config import *
+from scripts.config import *
 
 if __name__ == '__main__':
     gpus = tf.config.list_physical_devices(device_type='GPU')
@@ -23,7 +22,7 @@ if __name__ == '__main__':
     # 加载模型
     model = model_loader.load(
         mode=1,
-        model_name='MobileNetV2',
+        model_name='ResNet50',
         filepath=SAVED_MODEL_DIR+'best',
         # dirpath=SAVED_MODEL_DIR
     )

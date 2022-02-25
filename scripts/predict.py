@@ -9,15 +9,14 @@
 '''
 from pathlib import Path
 import tensorflow as tf
-import cv2
 import numpy as np
-from config import *
-from models import ShuffleNetV2
+from scripts.config import *
 from utils import model_loader
 from utils.image_util import load_and_preprocess_image
 
 
 if __name__ == '__main__':
+    print(tf.__version__)
     gpus = tf.config.list_physical_devices(device_type='GPU')
     tf.config.experimental.set_visible_devices(devices=gpus[3], device_type='GPU')
     tf.config.experimental.set_memory_growth(device=gpus[3], enable=True)
@@ -25,7 +24,7 @@ if __name__ == '__main__':
     # 加载模型
     model = model_loader.load(
         mode=1,
-        model_name='MobileNetV2',
+        model_name='ResNet50',
         filepath=SAVED_MODEL_DIR+'best',
         dirpath=SAVED_MODEL_DIR
     )

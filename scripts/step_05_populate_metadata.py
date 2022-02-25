@@ -23,7 +23,7 @@ from tflite_support import metadata_schema_py_generated as _metadata_fb
 from tflite_support import metadata as _metadata
 # pylint: enable=g-direct-tensorflow-import
 
-from config import *
+from scripts.config import *
 
 FLAGS = flags.FLAGS
 
